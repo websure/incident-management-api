@@ -1,9 +1,7 @@
 import bunyan from 'bunyan';
 import IncidentModel from '../../../db/models/incident.model';
 import IncidentActivityModel from '../../../db/models/incident.activity.model';
-import { IncidentDataValidationSchema } from '../incident.validations.schema';
-import Users from '../../../db/users.db';
-import { isAdmin, getUserFromToken, generateErrorObj } from '../incident.utils';
+import { getUserFromToken, generateErrorObj } from '../incident.utils';
 import { STATUS } from '../incident.constants';
 
 const logger = bunyan.createLogger({ name: 'CreateIncident' });
@@ -15,16 +13,17 @@ const logger = bunyan.createLogger({ name: 'CreateIncident' });
  * @param {*} resBody
  * @returns incident object
  */
-const createIncidentObject = (resBody) => {
-  let incidentObj = resBody;
+const createIncidentObject = (req) => {
+  let incidentObj = req.body;
   let currUSer = getUserFromToken(req);
-  incidentObj.created_by = currUSer.name;
+  incidentObj.created_by = currUSer.userid;
   incidentObj.status = STATUS.ANALYSIS;
+  logger.info('Incident object created');
   return incidentObj;
 };
 
 /**
- *
+ * Create Activity object for Incident
  * @param incident object
  * @returns incident Activity object
  */
@@ -52,8 +51,10 @@ const createIncidentActivityObject = ({ id, status, assignee, created_by }) => {
  * returns incident Response object
  */
 const generateIncidentRespVO = (incident, incidentActivity) => {
+  logger.info('generating incident response VO ');
   return {
-    ...incident,
+    id: incident.id,
+    incident,
     activity: incidentActivity.activity,
   };
 };
@@ -69,20 +70,18 @@ const generateIncidentRespVO = (incident, incidentActivity) => {
 export default async function createIncident(req, res, next) {
   try {
     logger.info('request received to create an incident');
-    // check if user is admin
-    await isAdmin(req, res, next);
+
     // create & save incident object
-    const incidentDO = await IncidentModel.create(
-      createIncidentObject(req.body)
-    );
+    const incidentDO = await IncidentModel.create(createIncidentObject(req));
     // create & save activity object
     const activityDO = await IncidentActivityModel.create(
-      createIncidentActivityObject(incidentDO)
+      createIncidentActivityObject(incidentDO),
     );
-
-    return res.status(201).json(generateIncidentRespVO(incidentDO, activityDO));
+    return res
+      .status(201)
+      .json({ data: generateIncidentRespVO(incidentDO, activityDO) });
   } catch (e) {
-    logger.error('error in Creating incident ', e);
+    logger.error({ err: e }, 'error in creating incident');
     return res
       .status(500)
       .json(generateErrorObj('error in creating incident', e));

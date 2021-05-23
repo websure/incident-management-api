@@ -74,7 +74,7 @@ const generateIncidentActivityModel = (
   status,
   OldStatus,
   assignee,
-  OldAssignee
+  OldAssignee,
 ) => {
   const { activity } = activityList;
   const { incident_status, incident_assignee } = activity;
@@ -126,7 +126,7 @@ export default async function updateIncident(req, res) {
         {},
         (err, doc) => {
           if (err) throw 'Error in updating the the incident';
-        }
+        },
       ).exec();
 
       const { status: OldStatus, assignee: OldAssignee } = incidentDO;
@@ -144,7 +144,7 @@ export default async function updateIncident(req, res) {
             status,
             OldStatus,
             assignee,
-            OldAssignee
+            OldAssignee,
           );
         // update activity model
         incidentActivityDO = await IncidentActivityModel.updateOne(
@@ -155,7 +155,7 @@ export default async function updateIncident(req, res) {
               incident_assignee: updatedAssignee,
             },
           },
-          { new: true }
+          { new: true },
         );
       }
       // response

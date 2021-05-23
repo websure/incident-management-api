@@ -4,8 +4,12 @@ import {
   INCIDENT_TYPE,
 } from '../../modules/incident/incident.constants';
 
-const incidentSchema = new Schema(
+const IncidentSchema = new Schema(
   {
+    id: {
+      type: mongoose.ObjectId,
+      unique: true,
+    },
     created_by: {
       type: String,
       required: [true, 'created_by is missing'],
@@ -24,7 +28,7 @@ const incidentSchema = new Schema(
     },
     assignee: {
       type: String,
-      required: [true, 'incident Assignee is missing'],
+      default: '',
     },
     acknowledge: {
       type: String,
@@ -37,26 +41,87 @@ const incidentSchema = new Schema(
       required: [true, 'incident Assignee is missing'],
     },
   },
-  { timestamps: { createdAt: 'created_on', updatedAt: 'updated_on' } }
+  {
+    timestamps: { createdAt: 'created_on', updatedAt: 'updated_on' },
+
+    toObject: {
+      virtuals: false,
+      versionKey: false,
+      transform: function (doc, ret) {
+        return {
+          id: ret.id,
+          created_by: ret.created_by,
+          description: ret.description,
+          status: ret.status,
+          title: ret.title,
+          assignee: ret.assignee,
+          acknowledge: ret.acknowledge,
+          type: ret.type,
+          updated_on: ret.updated_on,
+          created_on: ret.created_on,
+        };
+      },
+    },
+    toJSON: {
+      virtuals: false,
+      versionKey: false,
+      transform: function (doc, ret) {
+        return {
+          id: ret.id,
+          created_by: ret.created_by,
+          description: ret.description,
+          status: ret.status,
+          title: ret.title,
+          assignee: ret.assignee,
+          acknowledge: ret.acknowledge,
+          type: ret.type,
+          updated_on: ret.updated_on,
+          created_on: ret.created_on,
+        };
+      },
+    },
+  },
 );
 
-incidentSchema.virtual('id').get(function () {
-  return this._id;
+IncidentSchema.pre('save', function () {
+  if (this.isNew) {
+    this.id = this._id;
+  }
 });
 
-// incidentSchema.methods = {
-//   toJSON() {
-//     /* return object */
-//     let respObj = {
-//       id: this._id,
-//       product_code: this.product_code,
-//       description: this.description,
-//       created_on: this.created_on,
+// IncidentSchema.options.toJSON = {
+//   transform: function (doc, ret, options) {
+//     return {
+//       id: ret._id,
+//       created_by: ret.created_by,
+//       description: ret.description,
+//       status: ret.status,
+//       title: ret.title,
+//       assignee: ret.assignee,
+//       acknowledge: ret.acknowledge,
+//       type: ret.type,
+//       updated_on: ret.updated_on,
+//       created_on: ret.created_on,
 //     };
-//     if (this.updated_on) {
-//       respObj.updated_on = this.updated_on;
-//     }
-//     return respObj;
 //   },
 // };
-export default mongoose.model('Incident', incidentSchema);
+
+// IncidentSchema.methods.toJSON = function () {
+//   /* return object */
+//   let respObj = {
+//     id: this._id,
+//     created_by: this.created_by,
+//     description: this.description,
+//     status: this.status,
+//     title: this.title,
+//     assignee: this.assignee,
+//     acknowledge: this.acknowledge,
+//     type: this.type,
+//     updated_on: this.updated_on,
+//     created_on: this.created_on,
+//   };
+
+//   return respObj;
+// };
+
+export default mongoose.model('Incident', IncidentSchema);

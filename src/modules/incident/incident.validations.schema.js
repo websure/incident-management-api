@@ -1,23 +1,30 @@
 import joi from 'joi';
+import JOID from 'joi-oid';
+
 import {
   INCIDENT_TYPE,
   STATUS,
   ORDER_BY,
   INCIDENT_API_PARAMS,
 } from './incident.constants';
+
+const ObjectIDSchemaValidation = JOID.object({
+  id: JOID.objectId(),
+});
+
 const IncidentDataValidationSchema = joi.object().keys({
   status: joi
     .string()
     .valid(STATUS.ANALYSIS, STATUS.CLOSE, STATUS.DONE, STATUS.INPROGRESS),
-  title: joi.string().alphanum().max(200).required(),
-  description: joi.string().alphanum().max(1000),
-  acknowledge: joi.boolean(),
+  title: joi.string().max(200).required(),
+  description: joi.string().max(1000).allow('').optional(),
+  acknowledge: joi.boolean().optional(),
   type: joi
     .string()
     .valid(INCIDENT_TYPE.BUG, INCIDENT_TYPE.STORY, INCIDENT_TYPE.TASK)
     .required(),
-  assignee: joi.string().required(),
-  created_by: joi.string(),
+  assignee: joi.string().allow('').optional(),
+  created_by: joi.string().allow('').optional(),
 });
 
 const getIncidentListApiParamsSchema = joi.object().keys({
@@ -34,7 +41,7 @@ const getIncidentListApiParamsSchema = joi.object().keys({
       INCIDENT_API_PARAMS.ACKNOWLEDGE,
       INCIDENT_API_PARAMS.TYPE,
       INCIDENT_API_PARAMS.CREATED_ON,
-      INCIDENT_API_PARAMS.UPDATED_ON
+      INCIDENT_API_PARAMS.UPDATED_ON,
     ),
   orderby: joi.string().valid(ORDER_BY.ASC, ORDER_BY.DESC),
   filterby: joi.array().items(
@@ -47,7 +54,7 @@ const getIncidentListApiParamsSchema = joi.object().keys({
       type: joi
         .string()
         .valid(INCIDENT_TYPE.BUG, INCIDENT_TYPE.STORY, INCIDENT_TYPE.TASK),
-    })
+    }),
   ),
 });
 
@@ -61,16 +68,16 @@ const updateIncidentListApiParamsSchema = joi.object().keys({
           timestamp: joi.string(),
           from: joi.string(),
           to: joi.string(),
-        })
+        }),
       ),
       incident_assignee: joi.array().items(
         joi.object({
           timestamp: joi.string(),
           from: joi.string(),
           to: joi.string(),
-        })
+        }),
       ),
-    })
+    }),
   ),
 });
 
@@ -78,6 +85,7 @@ export {
   IncidentDataValidationSchema,
   getIncidentListApiParamsSchema,
   updateIncidentListApiParamsSchema,
+  ObjectIDSchemaValidation,
 };
 
 // export default {

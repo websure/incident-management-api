@@ -7,30 +7,41 @@ import {
   IncidentDataValidationSchema,
   getIncidentListApiParamsSchema,
   updateIncidentListApiParamsSchema,
+  ObjectIDSchemaValidation,
 } from './incident.validations.schema';
 import { isAdmin, ValidateDataMiddleware } from './incident.utils';
+
 const routes = new Router();
 
 routes.post(
   '/',
   ValidateDataMiddleware(getIncidentListApiParamsSchema),
-  incidentController.getIncident
+  incidentController.getIncident,
 );
 routes.post(
   '/create',
   ValidateDataMiddleware(IncidentDataValidationSchema),
   isAdmin,
-  incidentController.createIncident
+  incidentController.createIncident,
 );
-routes.get('/:id', incidentController.getIncidentDetails);
-routes.put(
+routes.get(
+  '/:id',
+  ValidateDataMiddleware(ObjectIDSchemaValidation),
+  incidentController.getIncidentDetails,
+);
+routes.post(
   '/update',
   ValidateDataMiddleware({
     ...IncidentDataValidationSchema,
     ...updateIncidentListApiParamsSchema,
   }),
-  incidentController.updateIncident
+  incidentController.updateIncident,
 );
-routes.delete('/:id', incidentController.deleteIncident);
+routes.delete(
+  '/:id',
+  ValidateDataMiddleware(ObjectIDSchemaValidation),
+  isAdmin,
+  incidentController.deleteIncident,
+);
 
 export default routes;

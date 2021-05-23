@@ -2,7 +2,7 @@ import express from 'express';
 import middlewareConfig from './config/middleware';
 import apiRoutes from './modules/appRoutes';
 import constants from './config/constants';
-//import './config/database';
+import './config/database';
 const app = express();
 middlewareConfig(app);
 
