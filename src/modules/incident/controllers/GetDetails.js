@@ -13,9 +13,10 @@ const logger = bunyan.createLogger({ name: 'GetIncidentDetails' });
  */
 
 const generateResponseVO = (incident, incidentActivityModel) => {
-  logger.info('getting incident details');
+  logger.info('generating details response object for incident details ');
   return {
-    ...incident,
+    id: incident.id,
+    incident,
     activity: incidentActivityModel.activity,
   };
 };
@@ -30,8 +31,8 @@ const generateResponseVO = (incident, incidentActivityModel) => {
 
 export default async function getIncidentDetails(req, res) {
   try {
-    logger.info('request received to fetch incident details');
     const { id } = req.params;
+    logger.info('request received to fetch incident details ', id);
     const incident = await IncidentModel.findOne({ id }).exec();
     const incidentActivityModel = await IncidentActivityModel.findOne({
       incident_id: incident.id,
@@ -40,7 +41,7 @@ export default async function getIncidentDetails(req, res) {
       .status(200)
       .json(generateResponseVO(incident, incidentActivityModel));
   } catch (e) {
-    logger.error('error in fetching incident details ', e);
+    logger.error({ err: e }, 'error in fetching incident details ');
     return res
       .status(500)
       .json(generateErrorObj('error in fetching incident details', e));

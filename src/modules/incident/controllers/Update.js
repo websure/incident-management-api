@@ -42,13 +42,14 @@ const validateIncidentModel = async (req, res) => {
     const { id, acknowledge } = req.body;
 
     const incidentDO = await IncidentModel.findOne({ id }).exec();
+    console.log('model to update   ', incidentDO);
     /**
      * only current user can acknowledge the incident.
      * if unauthorized user acknowledges the incident, will throw error
      */
     if (incidentDO.acknowledge !== acknowledge) {
       if (incidentDO.assignee !== currUser.userid) {
-        logger.error('Only assignee can acknowledge the Incident');
+        logger.error({ err: 'Only assignee can acknowledge the Incident' });
         throw 'Only assignee can acknowledge the Incident';
       }
     }
@@ -109,11 +110,11 @@ const generateIncidentActivityModel = (
 export default async function updateIncident(req, res) {
   try {
     if (req.body && Object.keys(req.body).length > 0) {
-      let id = req.body.id;
+      let { id, incident } = req.body;
       logger.info('request received to update an incident : ', id);
 
       const { description, status, type, title, assignee, acknowledge } =
-        req.body;
+        incident;
 
       // validate params
       const incidentDO = validateIncidentModel(req, res);

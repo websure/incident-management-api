@@ -44,24 +44,24 @@ const IncidentSchema = new Schema(
   {
     timestamps: { createdAt: 'created_on', updatedAt: 'updated_on' },
 
-    toObject: {
-      virtuals: false,
-      versionKey: false,
-      transform: function (doc, ret) {
-        return {
-          id: ret.id,
-          created_by: ret.created_by,
-          description: ret.description,
-          status: ret.status,
-          title: ret.title,
-          assignee: ret.assignee,
-          acknowledge: ret.acknowledge,
-          type: ret.type,
-          updated_on: ret.updated_on,
-          created_on: ret.created_on,
-        };
-      },
-    },
+    // toObject: {
+    //   virtuals: false,
+    //   versionKey: false,
+    //   transform: function (doc, ret) {
+    //     return {
+    //       id: ret.id,
+    //       created_by: ret.created_by,
+    //       description: ret.description,
+    //       status: ret.status,
+    //       title: ret.title,
+    //       assignee: ret.assignee,
+    //       acknowledge: ret.acknowledge,
+    //       type: ret.type,
+    //       updated_on: ret.updated_on,
+    //       created_on: ret.created_on,
+    //     };
+    //   },
+    // },
     toJSON: {
       virtuals: false,
       versionKey: false,

@@ -74,6 +74,15 @@ create_incident_successful_response = {
 
 //mock_delete  : 60aa26d86e129d5ec81cf415
 
+mock_get_list = {
+  start_index: 5,
+  max: 5,
+  filterby: [
+    {
+      acknowledge: false,
+    },
+  ],
+};
 /**
 test cases:
 
@@ -91,5 +100,9 @@ invalid objectID =
     "msg": "Invalid Incident Object",
     "error": "It must have a valid ObjectId."
 }
+
+
+get list
+
 
  */

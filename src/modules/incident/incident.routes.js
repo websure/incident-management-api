@@ -9,28 +9,35 @@ import {
   updateIncidentListApiParamsSchema,
   ObjectIDSchemaValidation,
 } from './incident.validations.schema';
-import { isAdmin, ValidateDataMiddleware } from './incident.utils';
+import {
+  isAdmin,
+  ValidateDataMiddleware,
+  isAuthorizedUser,
+} from './incident.utils';
 
 const routes = new Router();
 
 routes.post(
   '/',
+  isAuthorizedUser,
   ValidateDataMiddleware(getIncidentListApiParamsSchema),
   incidentController.getIncident,
 );
 routes.post(
   '/create',
-  ValidateDataMiddleware(IncidentDataValidationSchema),
   isAdmin,
+  ValidateDataMiddleware(IncidentDataValidationSchema),
   incidentController.createIncident,
 );
 routes.get(
   '/:id',
+  isAuthorizedUser,
   ValidateDataMiddleware(ObjectIDSchemaValidation),
   incidentController.getIncidentDetails,
 );
 routes.post(
   '/update',
+  isAuthorizedUser,
   ValidateDataMiddleware({
     ...IncidentDataValidationSchema,
     ...updateIncidentListApiParamsSchema,
@@ -39,8 +46,8 @@ routes.post(
 );
 routes.delete(
   '/:id',
-  ValidateDataMiddleware(ObjectIDSchemaValidation),
   isAdmin,
+  ValidateDataMiddleware(ObjectIDSchemaValidation),
   incidentController.deleteIncident,
 );
 

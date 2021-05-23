@@ -22,6 +22,24 @@ const isAdmin = (req, res, next) => {
     .json(generateErrorObj('Only admin can create/delete an incident'));
 };
 
+/**
+ * checks if user is authorized
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ * @returns
+ */
+const isAuthorizedUser = (req, res, next) => {
+  let user = Users.filter(
+    (user) => user.token === req.headers['authorization'],
+  );
+  if (user.length === 1) return next();
+  logger.error({ err: 'unauthorized user' });
+  return res
+    .status(500)
+    .json(generateErrorObj('Only authorized users can access incidents'));
+};
+
 const getUserFromToken = (req) => {
   let user = Users.filter(
     (user) => user.token === req.headers['authorization'],
@@ -55,4 +73,10 @@ const ValidateDataMiddleware = (schema) => {
   };
 };
 
-export { ValidateDataMiddleware, generateErrorObj, getUserFromToken, isAdmin };
+export {
+  ValidateDataMiddleware,
+  generateErrorObj,
+  getUserFromToken,
+  isAdmin,
+  isAuthorizedUser,
+};

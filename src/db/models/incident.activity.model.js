@@ -45,15 +45,15 @@ const IncidentActivitySchema = new Schema(
   },
   {
     timestamps: { createdAt: 'created_on', updatedAt: 'updated_on' },
-    toObject: {
-      transform: function (doc, ret) {
-        return {
-          id: ret.id,
-          incident_id: ret.incident_id,
-          activity: ret.activity,
-        };
-      },
-    },
+    // toObject: {
+    //   transform: function (doc, ret) {
+    //     return {
+    //       id: ret.id,
+    //       incident_id: ret.incident_id,
+    //       activity: ret.activity,
+    //     };
+    //   },
+    // },
     toJSON: {
       transform: function (doc, ret) {
         return {

@@ -50,12 +50,12 @@ const createIncidentActivityObject = ({ id, status, assignee, created_by }) => {
 /**
  * returns incident Response object
  */
-const generateIncidentRespVO = (incident, incidentActivity) => {
+const generateIncidentRespVO = (incident) => {
   logger.info('generating incident response VO ');
   return {
     id: incident.id,
     incident,
-    activity: incidentActivity.activity,
+    //activity: incidentActivity.activity,
   };
 };
 
@@ -77,9 +77,7 @@ export default async function createIncident(req, res, next) {
     const activityDO = await IncidentActivityModel.create(
       createIncidentActivityObject(incidentDO),
     );
-    return res
-      .status(201)
-      .json({ data: generateIncidentRespVO(incidentDO, activityDO) });
+    return res.status(201).json({ data: generateIncidentRespVO(incidentDO) });
   } catch (e) {
     logger.error({ err: e }, 'error in creating incident');
     return res
