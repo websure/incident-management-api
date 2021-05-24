@@ -33,10 +33,18 @@ export default async function getIncidentDetails(req, res) {
   try {
     const { id } = req.params;
     logger.info('request received to fetch incident details ', id);
-    const incident = await IncidentModel.findOne({ id }).exec();
+
+    const incident = await IncidentModel.findOne({ id });
+    if (!incident) {
+      throw 'No incident data found';
+    }
     const incidentActivityModel = await IncidentActivityModel.findOne({
       incident_id: incident.id,
     });
+    if (!incidentActivityModel) {
+      throw 'No incident activity data found';
+    }
+
     return res
       .status(200)
       .json(generateResponseVO(incident, incidentActivityModel));

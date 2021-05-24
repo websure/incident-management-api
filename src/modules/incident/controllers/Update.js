@@ -4,7 +4,7 @@ import IncidentActivityModel from '../../../db/models/incident.activity.model';
 import { getIncidentListApiParamsSchema } from '../incident.validations.schema';
 import Users from '../../../db/users.db';
 import { generateErrorObj, getUserFromToken } from '../incident.utils';
-
+import { STATUS } from '../incident.constants';
 const logger = bunyan.createLogger({ name: 'UpdateIncident' });
 
 /**
@@ -14,11 +14,10 @@ const logger = bunyan.createLogger({ name: 'UpdateIncident' });
  * @param {*} activityModel
  * @returns
  */
-const generateResponseVO = (body, incident, activityModel) => {
+const generateResponseVO = (body, activityModel) => {
   const { description, status, type, title, assignee, acknowledge } = body;
   logger.info('generates response object');
   return {
-    ...incident,
     description,
     status,
     type,
@@ -36,13 +35,16 @@ const generateResponseVO = (body, incident, activityModel) => {
  * @param {*} res
  * @returns
  */
-const validateIncidentModel = async (req, res) => {
+const fetchAndValidateIncidentModel = async (req, res) => {
   try {
     let currUser = getUserFromToken(req);
-    const { id, acknowledge } = req.body;
+    const { id } = req.params;
+    const { acknowledge } = req.body;
 
     const incidentDO = await IncidentModel.findOne({ id }).exec();
-    console.log('model to update   ', incidentDO);
+    if (!incidentDO) {
+      throw 'No incident data found';
+    }
     /**
      * only current user can acknowledge the incident.
      * if unauthorized user acknowledges the incident, will throw error
@@ -55,10 +57,11 @@ const validateIncidentModel = async (req, res) => {
     }
     return incidentDO;
   } catch (e) {
-    logger.error('error in updating incident ', e);
-    return res
-      .status(500)
-      .json(generateErrorObj('error in updating incident', e));
+    throw e;
+    // logger.error({err:e},'error in updating incident ');
+    // return res
+    //   .status(500)
+    //   .json(generateErrorObj('error in updating incident', e));
   }
 };
 /**
@@ -77,28 +80,44 @@ const generateIncidentActivityModel = (
   assignee,
   OldAssignee,
 ) => {
-  const { activity } = activityList;
-  const { incident_status, incident_assignee } = activity;
-  const updatedStatus = incident_status;
-  const updatedAssignee = incident_assignee;
+  try {
+    const { activity } = activityList;
+    const { incident_status, incident_assignee } = activity;
+    let updatedStatus = incident_status;
+    let updatedAssignee = incident_assignee;
 
-  if (status !== OldStatus) {
-    const lastStatus = incident_status[incident_status.length - 1];
-    updatedStatus = [...updatedStatus, { from: lastStatus.to, to: status }];
+    if (status !== OldStatus) {
+      /* check if status is valid */
+      let allowedStatusValues = Object.values(STATUS);
+      if (!allowedStatusValues.includes(status)) throw 'invalid status value';
+
+      const lastStatus = incident_status[incident_status.length - 1];
+      updatedStatus = [{ from: lastStatus.to, to: status }, ...updatedStatus];
+    }
+
+    if (assignee !== OldAssignee) {
+      // chekc if user is authorized
+      let validUser = Users.filter((user) => user.userid === assignee);
+      if (validUser.length === 0) throw 'Unauthorized user';
+
+      const lastAssignee =
+        incident_assignee.length > 0
+          ? incident_assignee[incident_assignee.length - 1]
+          : [{ to: '', from: '' }];
+
+      updatedAssignee = [
+        { from: lastAssignee.to, to: assignee },
+        ...updatedAssignee,
+      ];
+    }
+    return {
+      updatedStatus,
+      updatedAssignee,
+    };
+  } catch (e) {
+    logger.error({ err: e }, 'Error in updating activity model ');
+    throw e;
   }
-
-  if (assignee !== OldAssignee) {
-    const lastAssignee = incident_assignee[incident_assignee.length - 1];
-    updatedAssignee = [
-      ...updatedAssignee,
-      { from: lastAssignee.to, to: assignee },
-    ];
-  }
-
-  return {
-    updatedStatus,
-    updatedAssignee,
-  };
 };
 
 /**
@@ -107,48 +126,38 @@ const generateIncidentActivityModel = (
  * @param {*} res
  * @returns
  */
-export default async function updateIncident(req, res) {
+export default async function updateIncident(req, res, next) {
   try {
-    if (req.body && Object.keys(req.body).length > 0) {
-      let { id, incident } = req.body;
-      logger.info('request received to update an incident : ', id);
+    const { id } = req.params;
+    logger.info('request received to update incident ', id);
 
+    if (req.body && Object.keys(req.body).length > 0) {
       const { description, status, type, title, assignee, acknowledge } =
-        incident;
+        req.body;
 
       // validate params
-      const incidentDO = validateIncidentModel(req, res);
-      const incidentActivityDO = {};
+      const originalIncidentDO = await fetchAndValidateIncidentModel(req, res);
+      let incidentActivityDO = await IncidentActivityModel.findOne({
+        incident_id: id,
+      }).exec();
 
-      // update incident model
-      await IncidentModel.updateOne(
-        { id },
-        { description, status, type, title, assignee, acknowledge },
-        {},
-        (err, doc) => {
-          if (err) throw 'Error in updating the the incident';
-        },
-      ).exec();
-
-      const { status: OldStatus, assignee: OldAssignee } = incidentDO;
-
+      const { status: OldStatus, assignee: OldAssignee } = originalIncidentDO;
+      /**
+       * update activity only when status,assignee is changed
+       */
       if (status !== OldStatus || assignee !== OldAssignee) {
-        // update activity model only if status or assignee is changed
-        const activityList = await IncidentActivityModel.findOne({
-          incident_id: id,
-        }).exec();
-
-        // get updated status and assignee
+        logger.info('updating incident activity model ');
         const { updatedStatus, updatedAssignee } =
           generateIncidentActivityModel(
-            activityList,
+            incidentActivityDO,
             status,
             OldStatus,
             assignee,
             OldAssignee,
           );
+
         // update activity model
-        incidentActivityDO = await IncidentActivityModel.updateOne(
+        incidentActivityDO = await IncidentActivityModel.findOneAndUpdate(
           { incident_id: id },
           {
             activity: {
@@ -157,17 +166,36 @@ export default async function updateIncident(req, res) {
             },
           },
           { new: true },
+          (err, doc) => {
+            if (err) {
+              console.log('activity error  ', err);
+              throw 'Error in updating the the incident';
+            }
+            logger.info('activity model updated successful ', doc);
+          },
         );
       }
+
+      // update incident model
+      await IncidentModel.updateOne(
+        { id },
+        { description, status, type, title, assignee, acknowledge },
+        {},
+        (err, doc) => {
+          if (err) throw 'Error in updating the the incident';
+          logger.info('incident model updated successful ');
+        },
+      ).exec();
+
       // response
       return res
         .status(200)
-        .json(generateResponseVO(req.body, incidentDO, incidentActivityDO));
+        .json(generateResponseVO(req.body, incidentActivityDO));
     } else {
       throw 'Incident data is missing';
     }
   } catch (e) {
-    logger.error('error in updating incident ', e);
+    logger.error({ err: e }, 'error in updating incident ');
     return res
       .status(500)
       .json(generateErrorObj('error in updating incident', e));

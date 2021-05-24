@@ -29,10 +29,16 @@ const isAdmin = (req, res, next) => {
  * @param {*} next
  * @returns
  */
-const isAuthorizedUser = (req, res, next) => {
+
+const getUSer = (req) => {
   let user = Users.filter(
     (user) => user.token === req.headers['authorization'],
   );
+  return user;
+};
+
+const isAuthorizedUser = (req, res, next) => {
+  let user = getUSer(req);
   if (user.length === 1) return next();
   logger.error({ err: 'unauthorized user' });
   return res
@@ -79,4 +85,5 @@ export {
   getUserFromToken,
   isAdmin,
   isAuthorizedUser,
+  getUSer,
 };

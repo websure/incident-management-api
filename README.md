@@ -17,7 +17,7 @@ assignee:"", statusFrom:"", statusTo:"" } ] }
 
 https://stackabuse.com/building-a-rest-api-with-node-and-express/
 https://www.toptal.com/nodejs/secure-rest-api-in-nodejs
-
+https://wanago.io/2020/04/27/typescript-express-put-vs-patch-mongodb-mongoose/
 steps
 
 admin -> create , delete , assign incidents

@@ -1,12 +1,8 @@
 import { Router } from 'express';
-
-import validate from 'express-validation';
 import * as incidentController from './controllers/incident.controllers';
-//import { authLocal, authJwt } from '../../services/auth.services';
 import {
   IncidentDataValidationSchema,
   getIncidentListApiParamsSchema,
-  updateIncidentListApiParamsSchema,
   ObjectIDSchemaValidation,
 } from './incident.validations.schema';
 import {
@@ -17,33 +13,39 @@ import {
 
 const routes = new Router();
 
+// Get incident lists
 routes.post(
   '/',
   isAuthorizedUser,
   ValidateDataMiddleware(getIncidentListApiParamsSchema),
   incidentController.getIncident,
 );
+
+// create an incident
 routes.post(
   '/create',
   isAdmin,
   ValidateDataMiddleware(IncidentDataValidationSchema),
   incidentController.createIncident,
 );
+
+//get an incident details
 routes.get(
   '/:id',
   isAuthorizedUser,
   ValidateDataMiddleware(ObjectIDSchemaValidation),
   incidentController.getIncidentDetails,
 );
-routes.post(
-  '/update',
+
+//update an incident
+routes.put(
+  '/:id',
   isAuthorizedUser,
-  ValidateDataMiddleware({
-    ...IncidentDataValidationSchema,
-    ...updateIncidentListApiParamsSchema,
-  }),
+  ValidateDataMiddleware(IncidentDataValidationSchema),
   incidentController.updateIncident,
 );
+
+//delete an incident, its activity
 routes.delete(
   '/:id',
   isAdmin,
