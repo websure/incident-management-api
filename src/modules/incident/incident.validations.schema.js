@@ -44,18 +44,21 @@ const getIncidentListApiParamsSchema = joi.object().keys({
       INCIDENT_API_PARAMS.UPDATED_ON,
     ),
   orderby: joi.string().valid(ORDER_BY.ASC, ORDER_BY.DESC),
-  filterby: joi.array().items(
-    joi.object({
-      assignee: joi.string(),
-      acknowledge: joi.boolean(),
-      status: joi
-        .string()
-        .valid(STATUS.ANALYSIS, STATUS.CLOSE, STATUS.DONE, STATUS.INPROGRESS),
-      type: joi
-        .string()
-        .valid(INCIDENT_TYPE.BUG, INCIDENT_TYPE.STORY, INCIDENT_TYPE.TASK),
-    }),
-  ),
+  filterby: joi
+    .array()
+    .items(
+      joi.object({
+        assignee: joi.string(),
+        acknowledge: joi.boolean(),
+        status: joi
+          .string()
+          .valid(STATUS.ANALYSIS, STATUS.CLOSE, STATUS.DONE, STATUS.INPROGRESS),
+        type: joi
+          .string()
+          .valid(INCIDENT_TYPE.BUG, INCIDENT_TYPE.STORY, INCIDENT_TYPE.TASK),
+      }),
+    )
+    .allow(null),
 });
 
 const updateIncidentListApiParamsSchema = joi.object().keys({

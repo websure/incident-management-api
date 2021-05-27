@@ -12,13 +12,14 @@ const logger = bunyan.createLogger({ name: 'IncidentUtils' });
  * @returns
  */
 const isAdmin = (req, res, next) => {
+  console.log('----isAdmin------ ', req.headers);
   let currUSer = Users.filter(
     (user) => user.token === req.headers['authorization'],
   );
   if (currUSer.length > 0 && currUSer[0].isadmin) return next();
   logger.error({ err: 'Only admin can create an incident' });
   return res
-    .status(500)
+    .status(401)
     .json(generateErrorObj('Only admin can create/delete an incident'));
 };
 
@@ -42,7 +43,7 @@ const isAuthorizedUser = (req, res, next) => {
   if (user.length === 1) return next();
   logger.error({ err: 'unauthorized user' });
   return res
-    .status(500)
+    .status(401)
     .json(generateErrorObj('Only authorized users can access incidents'));
 };
 

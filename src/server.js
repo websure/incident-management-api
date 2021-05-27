@@ -20,6 +20,6 @@ app.listen(constants.PORT, (err) => {
     throw err;
     res.send(err);
   } else {
-    console.log('Server running on port: ' + 3000);
+    console.log('Server running on port: ' + constants.PORT);
   }
 });

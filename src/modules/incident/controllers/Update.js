@@ -14,10 +14,15 @@ const logger = bunyan.createLogger({ name: 'UpdateIncident' });
  * @param {*} activityModel
  * @returns
  */
-const generateResponseVO = (body, activityModel) => {
+const generateResponseVO = (body, originalIncidentDO, activityModel) => {
   const { description, status, type, title, assignee, acknowledge } = body;
+  const { created_by, id, created_on, updated_on } = originalIncidentDO;
   logger.info('generates response object');
   return {
+    created_by,
+    id,
+    created_on,
+    updated_on,
     description,
     status,
     type,
@@ -190,7 +195,9 @@ export default async function updateIncident(req, res, next) {
       // response
       return res
         .status(200)
-        .json(generateResponseVO(req.body, incidentActivityDO));
+        .json(
+          generateResponseVO(req.body, originalIncidentDO, incidentActivityDO),
+        );
     } else {
       throw 'Incident data is missing';
     }
