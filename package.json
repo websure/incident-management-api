@@ -4,7 +4,7 @@
   "description": "CRUD API for incident management",
   "main": "server.js",
   "scripts": {
-    "test": "jest --testTimeout=10000",
+    "test": "jest --testTimeout=10000 --runInBand",
     "clean": "rimraf dist",
     "readENV": "node read_env.js",
     "buildreal": "npm run clean && webpack",
@@ -61,6 +61,7 @@
   },
   "devDependencies": {
     "jest": "^27.0.1",
+    "jest-circus": "^27.0.1",
     "supertest": "^6.1.3"
   }
 }

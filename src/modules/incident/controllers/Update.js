@@ -91,7 +91,7 @@ const generateIncidentActivityModel = (
     let updatedStatus = incident_status;
     let updatedAssignee = incident_assignee;
 
-    if (status !== OldStatus) {
+    if (status && status !== OldStatus) {
       /* check if status is valid */
       let allowedStatusValues = Object.values(STATUS);
       if (!allowedStatusValues.includes(status)) throw 'invalid status value';
@@ -100,7 +100,7 @@ const generateIncidentActivityModel = (
       updatedStatus = [{ from: lastStatus.to, to: status }, ...updatedStatus];
     }
 
-    if (assignee !== OldAssignee) {
+    if (assignee && assignee !== OldAssignee) {
       // chekc if user is authorized
       let validUser = Users.filter((user) => user.userid === assignee);
       if (validUser.length === 0) throw 'Unauthorized user';

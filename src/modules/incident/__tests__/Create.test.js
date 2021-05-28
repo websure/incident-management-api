@@ -15,14 +15,6 @@ const CreateIncidentParams = {
   created_by: '',
 };
 
-const DeleteIncident = () => {
-  return request.delete('/api/v1/incident/60afb08fa32420609c98ccb5');
-};
-
-const CreateIncident = () => {
-  return request.post('/api/v1/incident/create');
-};
-
 beforeEach((done) => {
   mongoose.connect(
     'mongodb://localhost:27017/incident-management-test',
@@ -37,9 +29,10 @@ afterEach((done) => {
   });
 });
 
-describe('Test Delete Api', () => {
-  test('return 401 if user is not admin', (done) => {
-    DeleteIncident()
+describe('Test Create Api', () => {
+  it('return 401 if user is not admin', (done) => {
+    request
+      .post('/api/v1/incident/create')
       .expect({
         error: {},
         msg: 'Only admin can create/delete an incident',
@@ -47,29 +40,23 @@ describe('Test Delete Api', () => {
       .expect(401, done);
   });
 
-  test('create and delete an valid incident ', async () => {
+  test('create an incident ', async () => {
     const post = await request
       .post('/api/v1/incident/create')
       .send(CreateIncidentParams)
       .set('Authorization', 'df34e.ffrh.mh7u8');
-    await request
-      .delete(`/api/v1/incident/${post.body.data.id}`)
-      .set('Authorization', 'df34e.ffrh.mh7u8')
-      .expect({
-        data: {
-          id: post.body.data.id,
-          message: 'Incident and its activity deleted successfully',
-        },
-      });
+
+    const { incident } = post.body.data;
+    const { status, title, created_by } = incident;
+    expect(created_by).toEqual('admin');
+    expect(status).toEqual('analysis');
+    expect(title).toEqual('running test cases');
   });
 
-  test('delete an invalid incident id', async () => {
+  test('unauthorized user', async () => {
     await request
       .delete(`/api/v1/incident/abcd`)
-      .set('Authorization', 'df34e.ffrh.mh7u8')
-      .expect({
-        msg: 'Invalid Incident Object',
-        error: 'It must have a valid ObjectId.',
-      });
+      .set('Authorization', 'somewronguser')
+      .expect({ msg: 'Only admin can create/delete an incident', error: {} });
   });
 });
