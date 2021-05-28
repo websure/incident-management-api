@@ -58,7 +58,7 @@ describe('Test Get list Api', () => {
       .send(GetIncidentListParams)
       .set('Authorization', AdminToken);
 
-    expect(list.body.data.length).toBe(1);
+    expect(list.body.length).toBe(1);
   });
 
   test('Get list - invalid Params error ', async () => {

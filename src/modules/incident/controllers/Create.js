@@ -28,6 +28,7 @@ const createIncidentObject = (req) => {
  * @returns incident Activity object
  */
 const createIncidentActivityObject = ({ id, status, assignee, created_by }) => {
+  console.log('calling incident activity on create ');
   return {
     incident_id: id,
     activity: {
@@ -74,7 +75,7 @@ export default async function createIncident(req, res, next) {
     // create & save incident object
     const incidentDO = await IncidentModel.create(createIncidentObject(req));
     // create & save activity object
-    const activityDO = await IncidentActivityModel.create(
+    await IncidentActivityModel.create(
       createIncidentActivityObject(incidentDO),
     );
     return res.status(201).json({ data: generateIncidentRespVO(incidentDO) });

@@ -34,7 +34,7 @@ export default async function getIncident(req, res) {
       .sort(sortStr)
       .exec();
 
-    return res.status(200).json({ data: incidentList });
+    return res.status(200).json(incidentList);
   } catch (e) {
     logger.error({ err: e }, 'error in fetching incident ');
     return res

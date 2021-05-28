@@ -39,7 +39,7 @@ export default async function getIncidentDetails(req, res) {
       throw 'No incident data found';
     }
     const incidentActivityModel = await IncidentActivityModel.findOne({
-      incident_id: incident.id,
+      incident_id: id,
     });
     if (!incidentActivityModel) {
       throw 'No incident activity data found';
