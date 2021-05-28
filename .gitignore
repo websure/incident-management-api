@@ -105,3 +105,4 @@ dist
 
 # ignore dist
 dist/
+package-lock.json

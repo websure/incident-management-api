@@ -90,18 +90,3 @@ export {
   updateIncidentListApiParamsSchema,
   ObjectIDSchemaValidation,
 };
-
-// export default {
-//   createIncident: {
-//     status: joi
-//       .string()
-//       .valid('analysis', 'inprogress', 'done', 'close', 'delete')
-//       .required(),
-//     title: joi.string().alphanum().max(200).required(),
-//     description: joi.string().alphanum().max(1000),
-//     acknowledge: joi.boolean(),
-//     type: joi.string().valid('bug', 'task', 'story'),
-//     assignee: joi.string().required(),
-//     created_by: joi.string(),
-//   },
-// };

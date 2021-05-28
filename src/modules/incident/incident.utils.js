@@ -12,7 +12,6 @@ const logger = bunyan.createLogger({ name: 'IncidentUtils' });
  * @returns
  */
 const isAdmin = (req, res, next) => {
-  console.log('----isAdmin------ ', req.headers);
   let currUSer = Users.filter(
     (user) => user.token === req.headers['authorization'],
   );
