@@ -44,24 +44,6 @@ const IncidentSchema = new Schema(
   {
     timestamps: { createdAt: 'created_on', updatedAt: 'updated_on' },
 
-    // toObject: {
-    //   virtuals: false,
-    //   versionKey: false,
-    //   transform: function (doc, ret) {
-    //     return {
-    //       id: ret.id,
-    //       created_by: ret.created_by,
-    //       description: ret.description,
-    //       status: ret.status,
-    //       title: ret.title,
-    //       assignee: ret.assignee,
-    //       acknowledge: ret.acknowledge,
-    //       type: ret.type,
-    //       updated_on: ret.updated_on,
-    //       created_on: ret.created_on,
-    //     };
-    //   },
-    // },
     toJSON: {
       virtuals: false,
       versionKey: false,
@@ -88,40 +70,5 @@ IncidentSchema.pre('save', function () {
     this.id = this._id;
   }
 });
-
-// IncidentSchema.options.toJSON = {
-//   transform: function (doc, ret, options) {
-//     return {
-//       id: ret._id,
-//       created_by: ret.created_by,
-//       description: ret.description,
-//       status: ret.status,
-//       title: ret.title,
-//       assignee: ret.assignee,
-//       acknowledge: ret.acknowledge,
-//       type: ret.type,
-//       updated_on: ret.updated_on,
-//       created_on: ret.created_on,
-//     };
-//   },
-// };
-
-// IncidentSchema.methods.toJSON = function () {
-//   /* return object */
-//   let respObj = {
-//     id: this._id,
-//     created_by: this.created_by,
-//     description: this.description,
-//     status: this.status,
-//     title: this.title,
-//     assignee: this.assignee,
-//     acknowledge: this.acknowledge,
-//     type: this.type,
-//     updated_on: this.updated_on,
-//     created_on: this.created_on,
-//   };
-
-//   return respObj;
-// };
 
 export default mongoose.model('Incident', IncidentSchema);

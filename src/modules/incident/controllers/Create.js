@@ -18,7 +18,7 @@ const createIncidentObject = (req) => {
   let currUSer = getUserFromToken(req);
   incidentObj.created_by = currUSer.userid;
   incidentObj.status = STATUS.ANALYSIS;
-  logger.info('Incident object created');
+  logger.info('Incident object created ');
   return incidentObj;
 };
 
@@ -28,7 +28,6 @@ const createIncidentObject = (req) => {
  * @returns incident Activity object
  */
 const createIncidentActivityObject = ({ id, status, assignee, created_by }) => {
-  console.log('calling incident activity on create ');
   return {
     incident_id: id,
     activity: {
@@ -41,7 +40,7 @@ const createIncidentActivityObject = ({ id, status, assignee, created_by }) => {
       incident_assignee: [
         {
           from: created_by,
-          to: assignee,
+          to: assignee || 'unassigned',
         },
       ],
     },
@@ -74,6 +73,7 @@ export default async function createIncident(req, res, next) {
 
     // create & save incident object
     const incidentDO = await IncidentModel.create(createIncidentObject(req));
+
     // create & save activity object
     await IncidentActivityModel.create(
       createIncidentActivityObject(incidentDO),
